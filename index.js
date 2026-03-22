@@ -35,3 +35,4 @@ if (config.runsInWidget) {
 }
 
 Script.complete()
+//testing gitpuller scriptable script
