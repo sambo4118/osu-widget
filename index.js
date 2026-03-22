@@ -33,5 +33,5 @@ if (config.runsInWidget) {
 } else {
   widget.presentSmall()
 }
-let test = "gitpuller test"
+
 Script.complete()
