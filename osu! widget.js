@@ -23,17 +23,13 @@ userRequest.headers = { "authorization": `Bearer ${token}` };
 
 const data = await userRequest.loadJSON();
 
-// get recent scores to find last play time
-const scoresRequest = new Request("https://osu.ppy.sh/api/v2/users/32757211/scores/recent?limit=1");
-scoresRequest.headers = { "authorization": `Bearer ${token}` };
-const recentScores = await scoresRequest.loadJSON();
 
 
 
 // preset fonts
-const exo2Small = new Font("Exo2-regular", 12);
-const exo2Medium = new Font("Exo2-regular", 16);
-const exo2Large = new Font("Exo2-regular", 24);
+const exo2Small = new Font("torus", 12);
+const exo2Medium = new Font("torus", 16);
+const exo2Large = new Font("torus", 24);
 
 // preset colors
 const mainTextColor = new Color("#ffdded");
@@ -103,29 +99,32 @@ if (widgetSize === "medium") {
   dataColumn.layoutVertically();
   dataColumn.addSpacer(5);
 
-  // Calculate rank change first to get colors
+  // Calculate rank change since yesterday
+  // TEMP: spoofed for preview — remove this line to use real data
+  // const SPOOF_RANK_CHANGE = 4200;
+
   let rankChange = 0;
   let changeColor = mainTextColor;
   let arrow = "";
-  
-  if (recentScores.length > 0 && data.rank_history && data.rank_history.data && data.rank_history.data.length > 0) {
-    const lastPlayTime = new Date(recentScores[0].created_at);
-    const now = new Date();
-    const daysSincePlay = Math.floor((now - lastPlayTime) / (1000 * 60 * 60 * 24));
-    
-    if (daysSincePlay < data.rank_history.data.length) {
-      const historyData = data.rank_history.data;
-      const rankAtLastPlay = historyData[historyData.length - 1 - daysSincePlay];
-      rankChange = rankAtLastPlay - data.statistics.global_rank; // positive = improvement
-    }
-  } else if (data.rank_history && data.rank_history.data && data.rank_history.data.length > 1) {
+
+  if (data.rank_history && data.rank_history.data && data.rank_history.data.length > 1) {
     const historyData = data.rank_history.data;
-    const previousRank = historyData[historyData.length - 2];
-    rankChange = previousRank - data.statistics.global_rank;
+    const todayRank = historyData[historyData.length - 1];
+    // Scan backward to find the most recent day where rank was different
+    let referenceRank = null;
+    for (let i = historyData.length - 2; i >= 0; i--) {
+      if (historyData[i] !== 0 && historyData[i] !== todayRank) {
+        referenceRank = historyData[i];
+        break;
+      }
+    }
+    if (referenceRank !== null) {
+      rankChange = referenceRank - data.statistics.global_rank; // positive = improvement
+    }
   }
   
   if (rankChange !== 0) {
-    arrow = rankChange > 0 ? "▲" : "▼";
+    arrow = rankChange > 0 ? "▴" : "▾";
     changeColor = rankChange > 0 ? new Color("#a5cc00") : new Color("#ed1121");
   }
 
@@ -133,7 +132,6 @@ if (widgetSize === "medium") {
   rankLabelText.font = exo2Medium;
   rankLabelText.textColor = mainTextColor;
   
-  // Rank row with arrow
   const rankRow = dataColumn.addStack();
   rankRow.layoutHorizontally();
   rankRow.centerAlignContent();
