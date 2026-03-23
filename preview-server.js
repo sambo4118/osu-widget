@@ -303,6 +303,10 @@ function createScriptableRuntime(family) {
     joinPath(basePath, childPath) {
       return path.join(basePath, childPath);
     }
+
+    fileExists(filePath) {
+      return fs.existsSync(filePath);
+    }
   }
 
   const scriptState = {

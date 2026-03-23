@@ -45,15 +45,6 @@ const mainTextColor = new Color("#ffdded");
 const backgroundColorDark = new Color("#ba1177");
 const backgroundColorLight = new Color("#ed3399", 0.6);
 
-// Function to generate flag URL from country code
-function getFlagUrl(countryCode) {
-  if (!countryCode) return null;
-  const chars = countryCode.split('');
-  const hexChars = chars.map(chr => (chr.charCodeAt(0) + 127397).toString(16));
-  const fileName = hexChars.join('-');
-  return `https://osu.ppy.sh/assets/images/flags/${fileName}.svg`;
-}
-
 // Function to get grade rank from accuracy percentage
 function getGradeFromAccuracy(accuracy) {
   const percent = accuracy * 100;
@@ -71,19 +62,28 @@ const backgroundImage = Image.fromFile(backgroundImagePath);
 const avatarRequest = new Request(data.avatar_url);
 const avatarImage = await avatarRequest.loadImage();
 
-// Load flag image
+// Load flag image from local file
 let flagImage = null;
-const flagUrl = getFlagUrl(data.country_code);
-if (flagUrl) {
-  const flagRequest = new Request(flagUrl);
-  flagImage = await flagRequest.loadImage();
+if (data.country_code) {
+  try {
+    const flagsDir = fileManager.joinPath(fileManager.documentsDirectory(), 'flags');
+    const flagPath = fileManager.joinPath(flagsDir, `${data.country_code}.png`);
+    flagImage = Image.fromFile(flagPath);
+  } catch (error) {
+    console.log(`Flag not found: ${data.country_code}`);
+  }
 }
 
-// Load grade badge image
+// Load grade badge image from local file
+let badgeImage = null;
 const grade = getGradeFromAccuracy(data.statistics.accuracy);
-const badgeUrl = `https://osu.ppy.sh/images/badges/score-ranks-v2019/GradeSmall-${grade}.svg`;
-const badgeRequest = new Request(badgeUrl);
-const badgeImage = await badgeRequest.loadImage();
+try {
+  const badgesDir = fileManager.joinPath(fileManager.documentsDirectory(), 'badges');
+  const badgePath = fileManager.joinPath(badgesDir, `${grade}.png`);
+  badgeImage = Image.fromFile(badgePath);
+} catch (error) {
+  console.log(`Badge not found: ${grade}`);
+}
 
 // initialize widget with background image
 const widget = new ListWidget();
@@ -131,6 +131,8 @@ if (widgetSize === "small") {
   
   const { arrow, rankChange, changeColor } = getRankChangeInfo(data);
 
+  widget.addSpacer();
+
   const dataColumn = widget.addStack();
   dataColumn.layoutVertically();
 
@@ -155,7 +157,7 @@ if (widgetSize === "small") {
   rankRow.centerAlignContent();
   
   const rankText = rankRow.addText(`# ${data.statistics.global_rank}`);
-  rankText.font = large;
+  rankText.font = medium;
   rankText.textColor = mainTextColor;
   
   if (arrow) {
@@ -173,19 +175,15 @@ if (widgetSize === "small") {
   
   dataColumn.addSpacer(5);
   
-  const accuracyRow = dataColumn.addStack();
-  accuracyRow.layoutHorizontally();
-  accuracyRow.centerAlignContent();
-  
-  const gradeBadge = accuracyRow.addImage(badgeImage);
-  
-  accuracyRow.addSpacer(5);
-  
-  const accuracyText = accuracyRow.addText(`${(data.statistics.accuracy * 100).toFixed(2)} %`);
+  const statsRowOne = dataColumn.addStack();
+  statsRowOne.layoutHorizontally();
+  statsRowOne.centerAlignContent();
+
+  const accuracyText = statsRowOne.addText(`${(data.statistics.accuracy * 100).toFixed(2)} %`);
   accuracyText.font = medium;
   accuracyText.textColor = mainTextColor;
-  
-  const ppDisplayRow = dataColumn.addStack();
+
+  const ppDisplayRow = statsRowOne.addStack();
   ppDisplayRow.layoutHorizontally();
   ppDisplayRow.bottomAlignContent();
 
@@ -197,12 +195,15 @@ if (widgetSize === "small") {
   
   ppLabelText.textColor = mainTextColor;
   ppText.textColor = mainTextColor;
+  
+  widget.addSpacer();
 }
 
 if (widgetSize === "medium") {
   
   const { arrow, rankChange, changeColor } = getRankChangeInfo(data);
   
+  widget.addSpacer();
 
   const generalStack = widget.addStack();
   generalStack.layoutHorizontally();
@@ -215,11 +216,11 @@ if (widgetSize === "medium") {
   avatar.cornerRadius = 10;
   avatar.backgroundColor = new Color("#808080", 0.5);
   
-  generalStack.addSpacer(10);
+  generalStack.addSpacer(4);
 
   const dataColumn = generalStack.addStack();
   dataColumn.layoutVertically();
-  dataColumn.addSpacer(5);
+  dataColumn.addSpacer(4);
 
   const nameRow = dataColumn.addStack();
   nameRow.layoutHorizontally();
@@ -228,7 +229,7 @@ if (widgetSize === "medium") {
   usernameText.font = large;
   usernameText.textColor = mainTextColor;
 
-  nameRow.addSpacer(10);
+  nameRow.addSpacer(4);
 
   if (flagImage) {
     const countryFlag = nameRow.addImage(flagImage);
@@ -246,7 +247,7 @@ if (widgetSize === "medium") {
   rankText.textColor = mainTextColor;
   
   if (arrow) {
-    rankRow.addSpacer(8);
+    rankRow.addSpacer(4);
     const arrowText = rankRow.addText(arrow);
     arrowText.font = large;
     arrowText.textColor = changeColor;
@@ -257,25 +258,17 @@ if (widgetSize === "medium") {
     changeText.font = medium;
     changeText.textColor = changeColor;
   }
-  dataColumn.addSpacer(10);
+  dataColumn.addSpacer(5);
 
   const statsRowOne = dataColumn.addStack();
   statsRowOne.layoutHorizontally();
   statsRowOne.centerAlignContent();
 
-  const accuracyDisplayRow = statsRowOne.addStack();
-  accuracyDisplayRow.layoutHorizontally();
-  accuracyDisplayRow.centerAlignContent();
-
-  const gradeBadge = accuracyDisplayRow.addImage(badgeImage);
-  
-  accuracyDisplayRow.addSpacer(5);
-
-  const accuracyText = accuracyDisplayRow.addText(`${(data.statistics.accuracy * 100).toFixed(2)} %`);
+  const accuracyText = statsRowOne.addText(`${(data.statistics.accuracy * 100).toFixed(2)} %`);
   accuracyText.font = medium;
   accuracyText.textColor = mainTextColor;
 
-  statsRowOne.addSpacer(10);
+  statsRowOne.addSpacer(5);
 
   const ppDisplayRow = statsRowOne.addStack();
   ppDisplayRow.layoutHorizontally();
@@ -291,7 +284,8 @@ if (widgetSize === "medium") {
   ppText.textColor = mainTextColor;
   
   generalStack.addSpacer();
-  widget.addSpacer(20);
+  
+  widget.addSpacer();
 
 }
 

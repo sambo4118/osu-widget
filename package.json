@@ -3,5 +3,8 @@
   "private": true,
   "scripts": {
     "preview": "node preview-server.js"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
   }
 }
