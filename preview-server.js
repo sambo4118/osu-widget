@@ -91,6 +91,7 @@ function serializeNode(node) {
       type: node.type,
       layout: node.layout,
       centerAlignContent: node.centerAligned,
+      bottomAlignContent: node.bottomAligned,
       backgroundImage: node.type === "widget" ? serializeImage(node.backgroundImage) : null,
       children: node.children.map((child) => serializeNode(child))
     };
@@ -221,6 +222,7 @@ function createScriptableRuntime(family) {
       this.type = type;
       this.layout = "vertical";
       this.centerAligned = false;
+      this.bottomAligned = false;
       this.children = [];
     }
 
@@ -256,6 +258,10 @@ function createScriptableRuntime(family) {
 
     centerAlignContent() {
       this.centerAligned = true;
+    }
+
+    bottomAlignContent() {
+      this.bottomAligned = true;
     }
   }
 

@@ -130,16 +130,19 @@ body {
 .scriptable-widget.family-small {
   width: 170px;
   height: 170px;
+  transform: scale(1.5);
 }
 
 .scriptable-widget.family-medium {
   width: 364px;
   height: 170px;
+  transform: scale(1.5);
 }
 
 .scriptable-widget.family-large {
   width: 364px;
   min-height: 382px;
+  transform: scale(1.5);
 }
 
 .stack {
@@ -159,6 +162,10 @@ body {
 
 .stack.centered {
   align-items: center;
+}
+
+.stack.bottom-aligned {
+  align-items: flex-end;
 }
 
 .text-node {

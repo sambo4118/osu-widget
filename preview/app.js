@@ -24,6 +24,9 @@ function createNode(node, parentLayout = "vertical") {
     if (node.centerAlignContent) {
       element.classList.add("centered");
     }
+    if (node.bottomAlignContent) {
+      element.classList.add("bottom-aligned");
+    }
 
     for (const child of node.children) {
       element.appendChild(createNode(child, node.layout));
