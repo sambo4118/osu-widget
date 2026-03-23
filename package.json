@@ -1,0 +1,7 @@
+{
+  "name": "osu-widget",
+  "private": true,
+  "scripts": {
+    "preview": "node preview-server.js"
+  }
+}

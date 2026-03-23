@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scriptable Preview</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <section class="toolbar">
+      <h1>Scriptable Browser Preview</h1>
+      <div class="controls">
+        <div class="segmented" role="tablist" aria-label="Widget size">
+          <button type="button" class="active" data-family="small">Small</button>
+          <button type="button" data-family="medium">Medium</button>
+        </div>
+        <button type="button" class="refresh" id="refreshButton">Reload Original Script</button>
+      </div>
+      <div class="status" id="status">Loading widget…</div>
+    </section>
+
+    <section class="stage">
+      <article class="scriptable-widget family-small" id="widgetHost"></article>
+    </section>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
